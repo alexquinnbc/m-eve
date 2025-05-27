@@ -1,1 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journey to Your Mitochondrial Mother</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e8e8e8;
+            overflow-x: hidden;
+        }
+
+        .hero-section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            background: radial-gradient(circle at center, rgba(255,215,0,0.1) 0%, transparent 70%);
+        }
+
+        .dna-animation {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .dna-strand {
+            position: absolute;
+            width: 4px;
+            height: 40px;
+            background: linear-gradient(45deg, #ffd700, #ff6b6b);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ffd700, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px rgba(255,215,0,0.5)); }
+            to { filter: drop-shadow(0 0 30px rgba(255,107,107,0.7)); }
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 600px;
+        }
+
+        .path-selector {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .path-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 25px;
+            width: 250px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .path-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .path-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .section {
+            min-height: 100vh;
+            padding: 80px 20px;
+            display: none;
+            position: relative;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ffd700, #ff6b6b);
+            transition: width 0.3s ease;
+            z-index: 1000;
+        }
+
+        .mitochondria-visualization {
+            width: 300px;
+            height: 300px;
+            margin: 2rem auto;
+            position: relative;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,215,0,0.3) 0%, rgba(255,107,107,0.2) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .mitochondria-core {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(45deg, #ffd700, #ff6b6b);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .interactive-timeline {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 2rem 0;
+        }
+
+        .timeline-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #ffd700 0%, #ff6b6b 50%, #4ecdc4 100%);
+            position: relative;
+            margin: 2rem 0;
+            cursor: pointer;
+        }
+
+        .timeline-thumb {
+            position: absolute;
+            top: -8px;
+            width: 24px;
+            height: 24px;
+            background: #fff;
+            border-radius: 50%;
+            cursor: grab;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease;
+        }
+
+        .timeline-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .perspective-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 2rem 0;
+        }
+
+        .perspective-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .perspective-card:hover {
+            border-color: #ffd700;
+            transform: translateY(-5px);
+        }
+
+        .perspective-card.active {
+            background: rgba(255,215,0,0.2);
+            border-color: #ffd700;
+        }
+
+        .health-calculator {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 2rem 0;
+        }
+
+        .slider-group {
+            margin: 1rem 0;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #333;
+            outline: none;
+            margin: 10px 0;
+        }
+
+        .impact-meter {
+            height: 20px;
+            background: linear-gradient(90deg, #ff4444 0%, #ffaa00 50%, #44ff44 100%);
+            border-radius: 10px;
+            position: relative;
+            margin: 1rem 0;
+        }
+
+        .impact-indicator {
+            position: absolute;
+            top: -5px;
+            width: 30px;
+            height: 30px;
+            background: #fff;
+            border-radius: 50%;
+            transition: left 0.3s ease;
+        }
+
+        .action-panel {
+            background: linear-gradient(135deg, rgba(255,215,0,0.2) 0%, rgba(255,107,107,0.2) 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .action-btn {
+            background: linear-gradient(45deg, #ffd700, #ff6b6b);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .nav-buttons {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,215,0,0.3);
+        }
+
+        .family-tree {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+            position: relative;
+        }
+
+        .tree-node {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ffd700, #ff6b6b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px;
+        }
+
+        .tree-node:hover {
+            transform: scale(1.2);
+        }
+
+        .tree-connection {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, #ffd700, #ff6b6b);
+            top: 50%;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.5rem; }
+            .path-selector { flex-direction: column; align-items: center; }
+            .perspective-cards { grid-template-columns: 1fr; }
+            .nav-buttons { bottom: 20px; right: 20px; }
+        }
+
+        .floating-hearts {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .heart {
+            position: absolute;
+            color: rgba(255,107,107,0.6);
+            font-size: 20px;
+            animation: floatUp 8s linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) scale(1);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="hero">
+        <div class="dna-animation" id="dnaAnimation"></div>
+        <div class="floating-hearts" id="floatingHearts"></div>
+        
+        <h1 class="hero-title">Meet Your Ancient Mother</h1>
+        <p class="hero-subtitle">
+            Every breath you take is powered by a gift from a woman who lived 150,000 years ago. 
+            You are about to discover the most intimate connection in human history.
+        </p>
+        
+        <div class="path-selector">
+            <div class="path-card" onclick="startJourney('scientist')">
+                <span class="path-icon">🔬</span>
+                <h3>The Scientist's Path</h3>
+                <p>Explore the genetic evidence and discover how we traced humanity back to one mother</p>
+            </div>
+            <div class="path-card" onclick="startJourney('descendant')">
+                <span class="path-icon">💝</span>
+                <h3>The Personal Journey</h3>
+                <p>Experience the emotional connection and understand what this means for your life</p>
+            </div>
+            <div class="path-card" onclick="startJourney('explorer')">
+                <span class="path-icon">🌍</span>
+                <h3>The Migration Story</h3>
+                <p>Follow your ancestors' incredible journey from Africa to every corner of Earth</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scientist Path -->
+    <section class="section" id="scientist-section">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 2rem; font-size: 2.5rem;">The Science of Connection</h2>
+            
+            <div class="mitochondria-visualization" onclick="animateMitochondria()">
+                <div class="mitochondria-core">
+                    ATP
+                </div>
+            </div>
+            
+            <div class="interactive-timeline">
+                <h3>Travel Through Time: Discover When Mitochondrial Eve Lived</h3>
+                <p>Slide through genetic history and see how mutations accumulated over time</p>
+                
+                <div class="timeline-slider" onclick="updateTimeline(event)">
+                    <div class="timeline-thumb" id="timelineThumb" style="left: 75%;"></div>
+                </div>
+                
+                <div id="timelineInfo">
+                    <h4>~150,000 Years Ago</h4>
+                    <p>This is when scientists estimate Mitochondrial Eve lived, based on the molecular clock of genetic mutations. Every human alive today carries mitochondria descended from hers.</p>
+                </div>
+            </div>
+
+            <div class="perspective-cards">
+                <div class="perspective-card" onclick="showPerspective('inheritance')">
+                    <h4>🧬 Maternal Inheritance</h4>
+                    <p>Unlike nuclear DNA, mitochondrial DNA passes unchanged from mother to child. Click to see how this creates an unbroken genetic line.</p>
+                </div>
+                <div class="perspective-card" onclick="showPerspective('mutations')">
+                    <h4>⏰ Molecular Clock</h4>
+                    <p>Random mutations accumulate at predictable rates. This genetic "clock" lets us calculate when our common ancestor lived.</p>
+                </div>
+                <div class="perspective-card" onclick="showPerspective('evidence')">
+                    <h4>🌍 Global Evidence</h4>
+                    <p>DNA from people worldwide shows the same pattern: all mitochondrial lineages trace back to Africa.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Personal Journey Path -->
+    <section class="section" id="descendant-section">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 2rem; font-size: 2.5rem;">Your Personal Connection</h2>
+            
+            <div class="family-tree">
+                <div class="tree-node" onclick="showAncestor('eve')" style="background: linear-gradient(45deg, #ffd700, #ff6b6b);">
+                    Eve
+                </div>
+                <div class="tree-connection" style="width: 100px; left: 100px;"></div>
+                <div class="tree-node" onclick="showAncestor('generations')" style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4);">
+                    7,500<br>Gens
+                </div>
+                <div class="tree-connection" style="width: 100px; left: 220px;"></div>
+                <div class="tree-node" onclick="showAncestor('you')" style="background: linear-gradient(45deg, #4ecdc4, #95e1d3);">
+                    YOU
+                </div>
+            </div>
+
+            <div class="health-calculator">
+                <h3>Your Mitochondrial Health Impact Calculator</h3>
+                <p>See how your lifestyle choices affect the cellular powerhouses you inherited from your ancient mother</p>
+                
+                <div class="slider-group">
+                    <label>Exercise Level (hours/week): <span id="exerciseValue">3</span></label>
+                    <input type="range" class="slider" min="0" max="10" value="3" id="exerciseSlider" oninput="updateHealth()">
+                </div>
+                
+                <div class="slider-group">
+                    <label>Sleep Quality (1-10): <span id="sleepValue">7</span></label>
+                    <input type="range" class="slider" min="1" max="10" value="7" id="sleepSlider" oninput="updateHealth()">
+                </div>
+                
+                <div class="slider-group">
+                    <label>Stress Level (1-10): <span id="stressValue">5</span></label>
+                    <input type="range" class="slider" min="1" max="10" value="5" id="stressSlider" oninput="updateHealth()">
+                </div>
+                
+                <div class="impact-meter">
+                    <div class="impact-indicator" id="healthIndicator" style="left: 60%;"></div>
+                </div>
+                
+                <div id="healthAdvice">
+                    <p><strong>Your mitochondrial health score: Good</strong></p>
+                    <p>Your ancient mother's gift is working well! Consider adding more exercise to boost mitochondrial production.</p>
+                </div>
+            </div>
+
+            <div class="action-panel">
+                <h3>Honor Your Genetic Heritage</h3>
+                <p>Every choice you make either honors or dishonors the sacrifice of your mitochondrial mother. What will you choose?</p>
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="takeAction('exercise')">Start Exercise Plan</button>
+                    <button class="action-btn" onclick="takeAction('nutrition')">Improve Nutrition</button>
+                    <button class="action-btn" onclick="takeAction('mindfulness')">Practice Mindfulness</button>
+                    <button class="action-btn" onclick="takeAction('connection')">Connect with Family</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Migration Story Path -->
+    <section class="section" id="explorer-section">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 2rem; font-size: 2.5rem;">The Great Human Journey</h2>
+            
+            <div style="text-align: center; margin: 2rem 0;">
+                <h3>From One Mother to 8 Billion Children</h3>
+                <p>Follow the incredible migration that took humanity from Africa to every corner of Earth</p>
+            </div>
+
+            <div class="interactive-timeline">
+                <h4>Migration Timeline</h4>
+                <div id="migrationStory">
+                    <p><strong>200,000 years ago:</strong> Your mitochondrial mother lives in Africa, surrounded by a small community of early humans.</p>
+                    <p><strong>70,000 years ago:</strong> Her descendants begin the great migration out of Africa, carrying her genetic gift to new lands.</p>
+                    <p><strong>45,000 years ago:</strong> Humans reach Australia and Europe, each group carrying the same mitochondrial signature.</p>
+                    <p><strong>15,000 years ago:</strong> The Americas are populated by people carrying your ancient mother's DNA.</p>
+                    <p><strong>Today:</strong> 8 billion people worldwide all carry mitochondria descended from the same loving mother.</p>
+                </div>
+            </div>
+
+            <div class="perspective-cards">
+                <div class="perspective-card active" onclick="showMigrationPerspective('unity')">
+                    <h4>🤝 Human Unity</h4>
+                    <p>Every person you meet shares the same mitochondrial ancestor. Racism becomes scientifically impossible when you understand this truth.</p>
+                </div>
+                <div class="perspective-card" onclick="showMigrationPerspective('diversity')">
+                    <h4>🌈 Beautiful Diversity</h4>
+                    <p>From one genetic beginning, humanity has flourished into incredible diversity. Different cultures, all from the same loving mother.</p>
+                </div>
+                <div class="perspective-card" onclick="showMigrationPerspective('responsibility')">
+                    <h4>🌍 Shared Responsibility</h4>
+                    <p>We all share the same planetary home that sustained our ancestors for millennia. Environmental protection becomes a family obligation.</p>
+                </div>
+            </div>
+
+            <div class="action-panel">
+                <h3>Live Your Legacy</h3>
+                <p>You now know the most important truth about humanity: we are one family. How will you use this knowledge?</p>
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="takeAction('prejudice')">Fight Prejudice</button>
+                    <button class="action-btn" onclick="takeAction('environment')">Protect Environment</button>
+                    <button class="action-btn" onclick="takeAction('education')">Educate Others</button>
+                    <button class="action-btn" onclick="takeAction('compassion')">Practice Compassion</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation -->
+    <div class="nav-buttons">
+        <button class="nav-btn" onclick="previousSection()">←</button>
+        <button class="nav-btn" onclick="nextSection()">→</button>
+    </div>
+
+    <script>
+        let currentSection = 0;
+        let currentPath = '';
+        const sections = ['hero', 'scientist-section', 'descendant-section', 'explorer-section'];
+
+        // Initialize animations
+        function initAnimations() {
+            createDNAStrands();
+            createFloatingHearts();
+            updateProgress();
+        }
+
+        function createDNAStrands() {
+            const container = document.getElementById('dnaAnimation');
+            for (let i = 0; i < 20; i++) {
+                const strand = document.createElement('div');
+                strand.className = 'dna-strand';
+                strand.style.left = Math.random() * 100 + '%';
+                strand.style.top = Math.random() * 100 + '%';
+                strand.style.animationDelay = Math.random() * 6 + 's';
+                container.appendChild(strand);
+            }
+        }
+
+        function createFloatingHearts() {
+            const container = document.getElementById('floatingHearts');
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.innerHTML = '♥';
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDuration = (Math.random() * 3 + 5) + 's';
+                container.appendChild(heart);
+                
+                setTimeout(() => {
+                    heart.remove();
+                }, 8000);
+            }, 1000);
+        }
+
+        function startJourney(path) {
+            currentPath = path;
+            currentSection = 1;
+            
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show selected path
+            if (path === 'scientist') {
+                document.getElementById('scientist-section').classList.add('active');
+            } else if (path === 'descendant') {
+                document.getElementById('descendant-section').classList.add('active');
+            } else if (path === 'explorer') {
+                document.getElementById('explorer-section').classList.add('active');
+            }
+            
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const progressBar = document.getElementById('progressBar');
+            const progress = (currentSection / (sections.length - 1)) * 100;
+            progressBar.style.width = progress + '%';
+        }
+
+        function nextSection() {
+            if (currentSection < sections.length - 1) {
+                currentSection++;
+                showSection(sections[currentSection]);
+                updateProgress();
+            }
+        }
+
+        function previousSection() {
+            if (currentSection > 0) {
+                currentSection--;
+                showSection(sections[currentSection]);
+                updateProgress();
+            }
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section, .hero-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            if (sectionId === 'hero') {
+                document.querySelector('.hero-section').style.display = 'flex';
+            } else {
+                document.getElementById(sectionId).style.display = 'block';
+            }
+        }
+
+        function animateMitochondria() {
+            const mito = document.querySelector('.mitochondria-visualization');
+            mito.style.animation = 'none';
+            setTimeout(() => {
+                mito.style.animation = 'pulse 1s ease-in-out 3';
+            }, 10);
+        }
+
+        function updateTimeline(event) {
+            const slider = event.currentTarget;
+            const rect = slider.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const percentage = (x / rect.width) * 100;
+            
+            document.getElementById('timelineThumb').style.left = percentage + '%';
+            
+            const years = Math.floor(200000 - (percentage * 1800));
+            const info = document.getElementById('timelineInfo');
+            
+            if (years > 100000) {
+                info.innerHTML = `
+                    <h4>~${years.toLocaleString()} Years Ago</h4>
+                    <p>This was before Mitochondrial Eve's time. Early human ancestors were evolving, but the maternal lineage that would connect all modern humans hadn't yet emerged.</p>
+                `;
+            } else if (years > 50000) {
+                info.innerHTML = `
+                    <h4>~${years.toLocaleString()} Years Ago</h4>
+                    <p>Mitochondrial Eve's descendants are beginning to spread across Africa. Her genetic signature is becoming established in the human population.</p>
+                `;
+            } else {
+                info.innerHTML = `
+                    <h4>~${years.toLocaleString()} Years Ago</h4>
+                    <p>Humans carrying Mitochondrial Eve's DNA are migrating out of Africa, spreading her genetic gift to populate the entire world.</p>
+                `;
+            }
+        }
+
+        function updateHealth() {
+            const exercise = document.getElementById('exerciseSlider').value;
+            const sleep = document.getElementById('sleepSlider').value;
+            const stress = document.getElementById('stressSlider').value;
+            
+            document.getElementById('exerciseValue').textContent = exercise;
+            document.getElementById('sleepValue').textContent = sleep;
+            document.getElementById('stressValue').textContent = stress;
+            
+            // Calculate health score
+            const healthScore = (parseInt(exercise) * 10 + parseInt(sleep) * 8 + (11 - parseInt(stress)) * 7) / 3;
+            const percentage = Math.min(healthScore, 100);
+            
+            document.getElementById('healthIndicator').style.left = percentage + '%';
+            
+            let advice = '';
+            let scoreText = '';
+            
+            if (percentage > 80) {
+                scoreText = 'Excellent';
+                advice = 'Your mitochondria are thriving! You\'re honoring your ancient mother\'s gift with excellent lifestyle choices.';
+            } else if (percentage > 60) {
+                scoreText = 'Good';
+                advice = 'Your mitochondria are healthy, but there\'s room for improvement. Consider optimizing your sleep or exercise routine.';
+            } else if (percentage > 40) {
+                scoreText = 'Fair';
+                advice = 'Your mitochondria need attention. Focus on regular exercise, better sleep, and stress reduction to honor your genetic heritage.';
+            } else {
+                scoreText = 'Needs Improvement';
+                advice = 'Your mitochondria are struggling. Remember, you carry a 150,000-year-old gift - treat it with the respect it deserves through better lifestyle choices.';
+            }
+            
+            document.getElementById('healthAdvice').innerHTML = `
+                <p><strong>Your mitochondrial health score: ${scoreText}</strong></p>
+                <p>${advice}</p>
+            `;
+        }
+
+        function takeAction(action) {
+            const messages = {
+                exercise: "Excellent choice! Your mitochondria multiply with exercise. Start with 30 minutes of activity today to honor your ancient mother's gift.",
+                nutrition: "Wonderful! Feed your mitochondria with colorful fruits, vegetables, and omega-3 rich foods. Your cellular ancestors will thank you.",
+                mindfulness: "Beautiful decision! Stress reduction protects your mitochondria from damage. Try 10 minutes of meditation today.",
+                connection: "Heartwarming choice! Connecting with family honors the unbroken maternal line that connects you to all humanity.",
+                prejudice: "Powerful commitment! Remember: every person shares your mitochondrial heritage. We are literally one human family.",
+                environment: "Essential action! The Earth that sustained your ancestors for millennia needs your protection for future generations.",
+                education: "Transformative choice! Share this knowledge - help others understand that humanity is one family with one shared mother.",
+                compassion: "Beautiful intention! When you see others as family (which they literally are), compassion becomes natural."
+            };
+            
+            alert(messages[action] || "Thank you for taking action to honor your genetic heritage!");
+        }
+
+        function showPerspective(type) {
+            // Remove active class from all cards
+            document.querySelectorAll('.perspective-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            // Add active class to clicked card
+            event.target.closest('.perspective-card').classList.add('active');
+            
+            // You could add more detailed content here for each perspective
+        }
+
+        function showMigrationPerspective(type) {
+            document.querySelectorAll('#
